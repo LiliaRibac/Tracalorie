@@ -1,4 +1,38 @@
 //Storage Controller
+const StorageCtrl = (function () {
+  //Public methods
+  return {
+    storeItem: function (item) {
+      let items ;
+      //Ckeck if any items in LS
+      if (localStorage.getItem("items") === null) {
+        items = [];
+        //Push new Item
+        items.push(item);
+        //set ls
+        localStorage.setItem("items", JSON.stringify(items));
+      } else {
+        //Get what is already in LS
+        items = JSON.parse(localStorage.getItem("items"));
+
+        //Push new Item
+        items.push(item);
+
+        //Res set LS
+        localStorage.setItem("items", JSON.stringify(items))
+      }
+    },
+    getItemFromStorage: function () {
+      let items;
+      if (localStorage.getItem("items") === null) {
+        items = [];
+      } else {
+        items = JSON.parse(localStorage.getItem("items"));
+      }
+      return items;
+    }
+  }
+})()
 
 //Item Conttroller
 const ItemCtrl = (function () {
@@ -11,7 +45,7 @@ const ItemCtrl = (function () {
 
   //Date Strucure /State
   const data = {
-    items: [
+   // items: [
       // {
       //   id: 0,
       //   name: "Steak Dinner",
@@ -27,7 +61,8 @@ const ItemCtrl = (function () {
       //   name: "Eggs",
       //   calories: 300
       // }
-    ],
+   // ],
+   items:StorageCtrl.getItemFromStorage(),
     currentItem: null,
     totalCalories: 0
   }
@@ -96,8 +131,8 @@ const ItemCtrl = (function () {
       //Remove item
       data.items.splice(index, 1);
     },
-    clearAllItems: function (){
-      data.items =[]
+    clearAllItems: function () {
+      data.items = []
     },
     setCurrentItem: function (item) {
       data.currentItem = item;
@@ -219,12 +254,12 @@ const UiCtrl = (function () {
       document.querySelector(UISelectors.itemCaloriesInput).value = ItemCtrl.getCurrentItem().calories;
       UiCtrl.showEditState();
     },
-    removeItems: function(){
+    removeItems: function () {
       let listItems = document.querySelectorAll(UISelectors.listItems);
 
       //Turn Node list into array
-      listItems= Array.from(listItems);
-      listItems.forEach(function(item){
+      listItems = Array.from(listItems);
+      listItems.forEach(function (item) {
         item.remove();
       })
     },
@@ -257,7 +292,7 @@ const UiCtrl = (function () {
 
 
 //App Controller
-const App = (function (ItemCtrl, UiCtrl) {
+const App = (function (ItemCtrl, StorageCtrl, UiCtrl) {
 
   //Load event Listeners
   const loadEventListeners = function () {
@@ -310,6 +345,9 @@ const App = (function (ItemCtrl, UiCtrl) {
 
       //Add total calories to UI
       UiCtrl.showTotalCalories(totalCalories);
+
+      //Store in LocalStorage
+      StorageCtrl.storeItem(newItem);
 
       //clear fields
       UiCtrl.clearInput()
@@ -389,7 +427,7 @@ const App = (function (ItemCtrl, UiCtrl) {
   }
 
   //Clear items event
-  const clearAllItemsClick = function() {
+  const clearAllItemsClick = function () {
 
     //Delete all items from data structore
     ItemCtrl.clearAllItems()
@@ -400,7 +438,7 @@ const App = (function (ItemCtrl, UiCtrl) {
     //Add total calories to UI
     UiCtrl.showTotalCalories(totalCalories);
 
-      //Remove from UI
+    //Remove from UI
     UiCtrl.removeItems();
 
     //Hide UL
@@ -437,7 +475,7 @@ const App = (function (ItemCtrl, UiCtrl) {
     }
   }
 
-})(ItemCtrl, UiCtrl);
+})(ItemCtrl, StorageCtrl, UiCtrl);
 
 //Initialize App
 App.init()
